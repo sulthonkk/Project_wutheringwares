@@ -100,19 +100,52 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Login', style: TextStyle(fontSize: 16)),
+                onPressed: _isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/register'),
-                  child: const Text('Belum punya akun? Register'),
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text('Login', style: TextStyle(fontSize: 16)),
+              ),
+
+              const SizedBox(height: 16),
+
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final result = await AuthService.loginWithGoogle();
+
+                  if (result['success']) {
+                    final user = result['user'];
+
+                    if (user.role == 'admin') {
+                      Navigator.pushReplacementNamed(context, '/admin');
+                    } else {
+                      Navigator.pushReplacementNamed(context, '/home');
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          result['message'] ?? 'Google login gagal',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.login),
+                label: const Text('Login dengan Google'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+              ),
+
+              const SizedBox(height: 16),
+
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/register'),
+                child: const Text('Belum punya akun? Register'),
+              ),
               ],
             ),
           ),

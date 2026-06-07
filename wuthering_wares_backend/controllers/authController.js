@@ -54,4 +54,53 @@ const login = (req, res) => {
   });
 };
 
-module.exports = { register, login };
+const googleLogin = (req, res) => {
+  const { email, name, google_id } = req.body;
+
+  if (!email || !google_id) {
+    return res.status(400).json({ message: 'Data Google tidak valid' });
+  }
+
+  db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Server error' });
+
+    if (results.length === 0) {
+      // User belum ada, auto register
+      db.query(
+        'INSERT INTO users (name, email, google_id, role) VALUES (?, ?, ?, "customer")',
+        [name, email, google_id],
+        (err, result) => {
+          if (err) return res.status(500).json({ message: 'Server error' });
+
+          const token = jwt.sign(
+            { id: result.insertId, email, role: 'customer' },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+          );
+
+          res.json({
+            message: 'Login berhasil',
+            token,
+            user: { id: result.insertId, name, email, role: 'customer' }
+          });
+        }
+      );
+    } else {
+      // User udah ada, langsung login
+      const user = results[0];
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      res.json({
+        message: 'Login berhasil',
+        token,
+        user: { id: user.id, name: user.name, email: user.email, role: user.role }
+      });
+    }
+  });
+};
+
+module.exports = { register, login, googleLogin };
