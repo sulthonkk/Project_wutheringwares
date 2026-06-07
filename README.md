@@ -1,16 +1,58 @@
-# project_wutheringwares
+# Wuthering Wares
 
-A new Flutter project.
+Aplikasi mobile e-commerce bertema Wuthering Waves untuk jual beli resonator equipment dan terminal supplies.
 
-## Getting Started
+## Tentang Aplikasi
 
-This project is a starting point for a Flutter application.
+Wuthering Wares adalah aplikasi Flutter yang memungkinkan pengguna untuk browse dan membeli berbagai equipment untuk resonator mereka. Admin dapat mengelola katalog produk secara penuh melalui aplikasi yang sama.
 
-A few resources to get you started if this is your first Flutter project:
+## Fitur
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Login & Register (email/password dan Google OAuth)
+- Browse katalog equipment lengkap dengan detail produk
+- Beli equipment dengan autentikasi bearer token
+- Admin panel untuk kelola produk (tambah, edit, hapus)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Tech Stack
+
+| Layer | Teknologi |
+|---|---|
+| Mobile App | Flutter 3.32.2 (Dart) |
+| Backend | Node.js 22.16.0 + Express |
+| Database | MySQL via XAMPP 8.2.12 |
+| Auth | JWT Bearer Token + Google OAuth |
+
+## Cara Menjalankan
+
+### Backend
+```bash
+cd wuthering_wares_backend
+npm install
+npm run dev
+```
+
+### Flutter
+```bash
+flutter pub get
+flutter run
+```
+
+## Struktur Project
+
+```
+project_wutheringwares/
+├── lib/
+│   ├── models/
+│   ├── services/
+│   ├── screens/
+│   └── widgets/
+└── wuthering_wares_backend/
+    ├── config/
+    ├── controllers/
+    ├── middleware/
+    └── routes/
+```
+
+## Mata Kuliah
+
+COSC6094 - Mobile Hybrid Solution | Computer Science BINUS University
