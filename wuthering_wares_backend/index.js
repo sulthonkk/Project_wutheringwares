@@ -23,6 +23,9 @@ app.use('/equipment', equipmentRoutes);
 const purchaseRoutes = require('./routes/purchaseRoutes');
 app.use('/purchase', purchaseRoutes);
 
+const terminalSupplyRoutes = require('./routes/terminalSupplyRoutes');
+app.use('/terminal-supplies', terminalSupplyRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,32 +1,44 @@
 const db = require('../config/db');
 
 const createPurchase = (req, res) => {
-  const { equipment_id, quantity } = req.body;
+  const { equipment_id, terminal_supply_id, quantity, item_type } = req.body;
   const user_id = req.user.id;
+  const type = item_type || 'equipment';
 
-  if (!equipment_id || !quantity) {
-    return res.status(400).json({ message: 'Equipment dan quantity harus diisi' });
+  if (!quantity) {
+    return res.status(400).json({ message: 'Quantity harus diisi' });
   }
 
-  db.query('SELECT * FROM equipment WHERE id = ?', [equipment_id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Server error' });
-    if (results.length === 0) return res.status(404).json({ message: 'Equipment tidak ditemukan' });
+  const table = type === 'equipment' ? 'equipment' : 'terminal_supplies';
+  const item_id = type === 'equipment' ? equipment_id : terminal_supply_id;
 
-    const equipment = results[0];
+  if (!item_id) {
+    return res.status(400).json({ message: 'Item harus dipilih' });
+  }
 
-    if (equipment.stock < quantity) {
+  db.query(`SELECT * FROM ${table} WHERE id = ?`, [item_id], (err, results) => {
+    if (err) {
+      console.log('DB Error:', err);
+      return res.status(500).json({ message: 'Server error' });
+    }
+    if (results.length === 0) return res.status(404).json({ message: 'Item tidak ditemukan' });
+
+    const item = results[0];
+    if (item.stock < quantity) {
       return res.status(400).json({ message: 'Stok tidak mencukupi' });
     }
 
-    const total_price = equipment.price * quantity;
+    const total_price = item.price * quantity;
 
     db.query(
-      'INSERT INTO purchases (user_id, equipment_id, quantity, total_price) VALUES (?, ?, ?, ?)',
-      [user_id, equipment_id, quantity, total_price],
+      'INSERT INTO purchases (user_id, equipment_id, terminal_supply_id, quantity, total_price, item_type) VALUES (?, ?, ?, ?, ?, ?)',
+      [user_id, type === 'equipment' ? item_id : null, type === 'terminal_supply' ? item_id : null, quantity, total_price, type],
       (err, result) => {
-        if (err) return res.status(500).json({ message: 'Server error' });
-
-        db.query('UPDATE equipment SET stock = stock - ? WHERE id = ?', [quantity, equipment_id], (err) => {
+        if (err) {
+          console.log('Insert Error:', err);
+          return res.status(500).json({ message: 'Server error' });
+        }
+        db.query(`UPDATE ${table} SET stock = stock - ? WHERE id = ?`, [quantity, item_id], (err) => {
           if (err) return res.status(500).json({ message: 'Server error' });
           res.status(201).json({ message: 'Pembelian berhasil', total_price });
         });
@@ -38,9 +50,14 @@ const createPurchase = (req, res) => {
 const getPurchaseHistory = (req, res) => {
   const user_id = req.user.id;
   const query = `
-    SELECT p.*, e.name as equipment_name, e.image, e.type 
+    SELECT p.*, 
+      COALESCE(e.name, ts.name) as item_name,
+      COALESCE(e.image, ts.image) as image,
+      COALESCE(e.type, ts.category) as type,
+      p.item_type
     FROM purchases p 
-    JOIN equipment e ON p.equipment_id = e.id 
+    LEFT JOIN equipment e ON p.equipment_id = e.id 
+    LEFT JOIN terminal_supplies ts ON p.terminal_supply_id = ts.id
     WHERE p.user_id = ?
     ORDER BY p.created_at DESC
   `;
