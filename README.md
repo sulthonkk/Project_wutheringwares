@@ -18,7 +18,7 @@ Wuthering Wares adalah aplikasi Flutter yang memungkinkan pengguna untuk browse 
 | Layer | Teknologi |
 |---|---|
 | Mobile App | Flutter 3.32.2 (Dart) |
-| Backend | Node.js 22.16.0 + Express |
+| Backend | Node.js + Express |
 | Database | MySQL via XAMPP |
 | Auth | JWT Bearer Token + Google OAuth |
 
